@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samjhao AI</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#eef2ff,#f8f9ff);
+  color:#222;
+}
+.header{
+  background:#6366f1;
+  color:white;
+  padding:22px 18px;
+  border-radius:0 0 25px 25px;
+}
+.logo{font-size:28px;font-weight:bold}
+.subtitle{margin-top:6px;opacity:.9}
+.container{padding:18px;max-width:600px;margin:auto}
+.card{
+  background:white;
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 5px 20px #0001;
+}
+textarea{
+  width:100%;
+  height:140px;
+  padding:15px;
+  border:2px solid #ddd;
+  border-radius:15px;
+  font-size:16px;
+  resize:none;
+  outline:none;
+}
+textarea:focus{border-color:#6366f1}
+button{
+  border:0;
+  border-radius:14px;
+  padding:14px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.mainbtn{
+  width:100%;
+  margin-top:12px;
+  background:#6366f1;
+  color:white;
+}
+.small{
+  background:#eef2ff;
+  color:#4f46e5;
+  margin-top:10px;
+}
+.answer{
+  display:none;
+  margin-top:18px;
+  padding:18px;
+  background:#f5f7ff;
+  border-radius:16px;
+  line-height:1.6;
+}
+.history{
+  margin-top:20px;
+}
+.history div{
+  background:white;
+  padding:12px;
+  margin-top:8px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">🧠 Samjhao</div>
+  <div class="subtitle">Kisi bhi topic ko simple language mein samjho</div>
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<textarea id="question"
+placeholder="Apna question likho...&#10;Example: Newton ka first law kya hai?"></textarea>
+
+<button class="mainbtn" onclick="explain()">✨ Samjhao</button>
+
+<button class="small" onclick="voice()">🎤 Voice se question bolo</button>
+
+<div id="answer" class="answer"></div>
+
+</div>
+
+<div class="history">
+<h3>📚 Recent Questions</h3>
+<div id="historyList">Abhi koi question nahi hai.</div>
+</div>
+
+</div>
+
+<script>
+
+function explain(){
+
+let q=document.getElementById("question").value.trim();
+
+if(q===""){
+alert("Pehle apna question likho 🙂");
+return;
+}
+
+let answer="";
+
+let text=q.toLowerCase();
+
+if(text.includes("newton") && text.includes("first")){
+answer="<b>Newton ka First Law:</b><br><br>Jab tak kisi object par external unbalanced force nahi lagta, object apni rest ya uniform motion ki state mein bana rehta hai.<br><br><b>Simple example:</b> Bus achanak brake lagati hai to body aage ki taraf jati hai. Iska reason inertia hai.";
+}
+
+else if(text.includes("quadratic")){
+answer="<b>Quadratic Equation:</b><br><br>Quadratic equation ka standard form hota hai:<br><br><b>ax² + bx + c = 0</b><br><br>Jahan a ≠ 0 hota hai.";
+}
+
+else if(text.includes("force")){
+answer="<b>Force:</b><br><br>Force kisi object ki motion ya shape ko change kar sakta hai.<br><br><b>Formula:</b> F = ma<br><br>F = Force, m = mass, a = acceleration.";
+}
+
+else{
+answer="<b>Samjho 👇</b><br><br>Tumne poocha: <b>"+escapeHTML(q)+"</b><br><br>Is topic ko simple language mein samajhne ke liye pehle uska basic concept samjho, phir formula/definition aur finally examples se practice karo.<br><br>💡 Ye abhi demo version hai. Baad mein isme real AI connect karke kisi bhi question ka detailed answer liya ja sakta hai.";
+}
+
+document.getElementById("answer").innerHTML=answer;
+document.getElementById("answer").style.display="block";
+
+saveHistory(q);
+}
+
+function escapeHTML(str){
+return str.replace(/[&<>"']/g,function(m){
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[m];
+});
+}
+
+function saveHistory(q){
+
+let history=JSON.parse(localStorage.getItem("samjhaoHistory")||"[]");
+
+history.unshift(q);
+history=history.slice(0,5);
+
+localStorage.setItem("samjhaoHistory",JSON.stringify(history));
+
+showHistory();
+}
+
+function showHistory(){
+
+let history=JSON.parse(localStorage.getItem("samjhaoHistory")||"[]");
+let box=document.getElementById("historyList");
+
+if(history.length===0){
+box.innerHTML="Abhi koi question nahi hai.";
+return;
+}
+
+box.innerHTML=history.map(x=>"<div>🔹 "+escapeHTML(x)+"</div>").join("");
+}
+
+function voice(){
+
+if(!("webkitSpeechRecognition" in window)){
+alert("Tumhare browser mein voice input available nahi hai.");
+return;
+}
+
+let recognition=new webkitSpeechRecognition();
+
+recognition.lang="hi-IN";
+recognition.start();
+
+recognition.onresult=function(event){
+document.getElementById("question").value=
+event.results[0][0].transcript;
+};
+}
+
+showHistory();
+
+</script>
+
+</body>
+</html>
